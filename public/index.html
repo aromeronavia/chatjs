@@ -1,5 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
-    <body>
-        <h1>Vete a la verga beto</h1>
-    </body>
+   <head>
+      <title>Chat Distribuidos</title>
+   </head>
+   <body>
+       <br/><br/><br/><br/>
+       <div style="margin-left:20%;margin-right:20%;width:60%;">
+       <label id="Current">fulano</label>
+       <div style="height: 100px;overflow-y: auto;">
+           <label style="float:left">Fulano: Mensaje</label>
+           <br/>
+           <label style="float:right">Yo: Mensaje</label>
+           <br/>
+            <label style="float:left">Fulano: Mensaje</label>
+           <br/>
+           <label style="float:right">Yo: Mensaje</label>
+           <br/>
+            <label style="float:left">Fulano: Mensaje</label>
+           <br/>
+           <label style="float:right">Yo: Mensaje</label>
+       </div>
+           <br/>
+           <input type="text" style="width:80%" /><input type="button" value="Enviar" style="width:7.5%"/><input type="button" value="Todos" style="width:7.5%"/>
+           
+           <h1>Usuarios Conectados:</h1>
+           <div style="height: 100px;overflow-y: auto;">
+               <div><label>Fulano</label><button>Hablar con fulano</button><button>Bloquear a Fulano</button><br/><br/></div>
+               <div><label>Fulano</label><button>Hablar con fulano</button><button>Bloquear a Fulano</button><br/><br/></div>
+               <div><label>Fulano</label><button>Hablar con fulano</button><button>Bloquear a Fulano</button><br/><br/></div>
+               <div><label>Fulano</label><button>Hablar con fulano</button><button>Bloquear a Fulano</button><br/><br/></div>
+               <div><label>Fulano</label><button>Hablar con fulano</button><button>Bloquear a Fulano</button><br/><br/></div>
+               <div><label>Fulano</label><button>Hablar con fulano</button><button>Bloquear a Fulano</button><br/><br/></div>
+           </div>
+           <div style="float:left;"><label>Clima: de la verga</label></div>
+           <div style="float:right;"><label>Hora: 13:12:12</label> </div>
+           </div>
+       <script src="/socket.io/socket.io.js"></script>
+        <script>
+            
+            
+        var socket = io('http://localhost');
+        socket.on('news', function (data) {
+        console.log(data);
+        socket.emit('my other event', { my: 'data' });
+        });
+            
+            function hola(){
+                document.getElementById("Current").innerHTML = "New text!";
+            }
+        </script>
+   </body>
 </html>
