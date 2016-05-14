@@ -2,24 +2,32 @@
 
 const _ = require('lodash');
 
+const USER_EXISTS = {
+  code: 500,
+  message: 'user already exists'
+}
+
 class State {
   constructor() {
     this.connectedUsers = [];
   }
 
   addUser(user) {
+    if (this._userExists(user)) return USER_EXISTS;
     this.connectedUsers.push(user);
     return this.connectedUsers;
   }
 
   removeUser(user) {
-    if(this._userExists(user)) {
-      _.remove(this.connectedUsers, (item) => {
-        return item === user;
-      });
+    _.remove(this.connectedUsers, (item) => {
+      return item === user;
+    });
 
-      return this.connectedUsers;
-    }
+    return this.connectedUsers;
+  }
+
+  requestUsers() {
+    return this.connectedUsers;
   }
 
   _userExists(user) {
