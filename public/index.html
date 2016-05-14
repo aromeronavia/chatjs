@@ -36,18 +36,6 @@
            <div style="float:right;"><label>Hora: 13:12:12</label> </div>
            </div>
        <script src="/socket.io/socket.io.js"></script>
-        <script>
-            
-            
-        var socket = io('http://localhost');
-        socket.on('news', function (data) {
-        console.log(data);
-        socket.emit('my other event', { my: 'data' });
-        });
-            
-            function hola(){
-                document.getElementById("Current").innerHTML = "New text!";
-            }
-        </script>
+       <script src="logic.js"></script>
    </body>
 </html>
