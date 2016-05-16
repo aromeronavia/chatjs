@@ -4,38 +4,50 @@
       <title>Chat Distribuidos</title>
    </head>
    <body>
+
+       
        <br/><br/><br/><br/>
        <div style="margin-left:20%;margin-right:20%;width:60%;">
-       <label id="Current">fulano</label>
-       <div style="height: 100px;overflow-y: auto;">
-           <label style="float:left">Fulano: Mensaje</label>
+        <h1 id="connectedUser" align="left">Chat Desconectado</h1>
+           <br/><br/><br/>
+
+           
+           <table>
+           <tbody>
+               <tr>
+                <td><div style="float:left;"><label id="weather"></label></div>
            <br/>
-           <label style="float:right">Yo: Mensaje</label>
-           <br/>
-            <label style="float:left">Fulano: Mensaje</label>
-           <br/>
-           <label style="float:right">Yo: Mensaje</label>
-           <br/>
-            <label style="float:left">Fulano: Mensaje</label>
-           <br/>
-           <label style="float:right">Yo: Mensaje</label>
+           <div style="float:left;"><label id="hour"></label> </div></td>
+               </tr>
+                <tr>
+                    <td>
+           <h1>Usuarios Conectados</h1>
+           <div style="height: 300px;overflow-y: auto;width:400px; border-color: #C0C0C0 #C0C0C0;   border-style: solid;" id="connectedUsers">
+               <form id="form1">
+   
+                </form>
+           </div>                        
+                    </td>
+                    <td style="width:100px;"></td>
+                    <td><br/><br/>
+                        <h1>Mensajes</h1>
+       <div style="height: 300px;overflow-y: auto; width:400px;border-color: #C0C0C0 #C0C0C0;   border-style: solid;" id="allMessages">
+ 
        </div>
            <br/>
-           <input type="text" style="width:80%" /><input type="button" value="Enviar" style="width:7.5%"/><input type="button" value="Todos" style="width:7.5%"/>
+           <input type="text" style="width:65%" id="messageText" />
+           <input type="button" onclick="sendMessage()" value="Enviar" style="width:33%"/>
+                    </td>
+                </tr>   
+            </tbody>
+           </table>
            
-           <h1>Usuarios Conectados:</h1>
-           <div style="height: 100px;overflow-y: auto;">
-               <div><label>Fulano</label><button>Hablar con fulano</button><button>Bloquear a Fulano</button><br/><br/></div>
-               <div><label>Fulano</label><button>Hablar con fulano</button><button>Bloquear a Fulano</button><br/><br/></div>
-               <div><label>Fulano</label><button>Hablar con fulano</button><button>Bloquear a Fulano</button><br/><br/></div>
-               <div><label>Fulano</label><button>Hablar con fulano</button><button>Bloquear a Fulano</button><br/><br/></div>
-               <div><label>Fulano</label><button>Hablar con fulano</button><button>Bloquear a Fulano</button><br/><br/></div>
-               <div><label>Fulano</label><button>Hablar con fulano</button><button>Bloquear a Fulano</button><br/><br/></div>
+           
+
+
+
            </div>
-           <div style="float:left;"><label>Clima: de la verga</label></div>
-           <div style="float:right;"><label>Hora: 13:12:12</label> </div>
-           </div>
-       <script src="/socket.io/socket.io.js"></script>
+       <!--<script src="/socket.io/socket.io.js"></script>-->
        <script src="logic.js"></script>
    </body>
 </html>
