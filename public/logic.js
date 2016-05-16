@@ -2,6 +2,7 @@ var contId = {};
 var acks = {};
 var conUser = {};
 var blockedUsers = {};
+var builtMessages = {};
 
 function sendMessage(){    
     
@@ -28,10 +29,26 @@ function sendMessage(){
     contId['cont'] = contId['cont']+1;
     var builtMessage = buildMessage(conUser['user'], name, message, contId['cont'])
     
-    alert(builtMessage); 
+    
+    acks[contId['cont']] = false;
+    builtMessages[contId['cont']] = builtMessage;
+    
     
 
+    //Send to server
+
 }
+
+function resendUnAcknowledged(){
+    for(var i = 1; i < Object.keys(acks).length;i++){
+        if(!acks[i]){
+            //resend
+            var builtMessage = builtMessages[i];
+        }
+    }
+}
+
+
 
 function recieveMessage(){
     var sender = '';
@@ -42,15 +59,16 @@ function recieveMessage(){
     
 }
 
+function listenToSocket(){
+    
+}
+
+setInterval(listenToSocket, 50);
+
 function buildMessage(sender, receiver, message, id){
     if(sender == undefined || receiver == undefined || message == undefined || id == undefined)
         return;
-        /*<message id="">
-            <sender></sender>
-            <receiver></receiver>
-            <message></message>
-            <hour></hour>
-</message>*/
+
     return '<message id ="' +id +'"><sender>' + 
             sender + '</sender><receiver>' + receiver + '</receiver><message>'  + message + '</message><hour></hour></message>';
 }
