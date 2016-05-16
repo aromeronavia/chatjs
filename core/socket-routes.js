@@ -2,42 +2,40 @@
 
 const app = require('express')();
 const http = require('http').Server(app);
-const io = require('socket.io')(http);
+const dgram = require('dgram');
+const socket = dgram.createSocket('udp4');
 
-const State = require('./state');
+const ClientMessagesHandler = require('./client-messages-handler.js');
+const State = require('./state.js');
 let state = new State();
 
+const messagesHandler = new ClientMessagesHandler(state);
+
+socket.on('error', (err) => {
+  console.log(`server error:\n${err.stack}`);
+  socket.close();
+});
+
+socket.on('message', (message, rinfo) => {
+  console.log(`server got: ${message} from ${rinfo.address}:${rinfo.port}`);
+  const response = messagesHandler.handleMessage(message);
+  socket.send(response, 0, response.length, rinfo.port, 'localhost', (error) => {
+    console.log('error', error);
+  });
+});
+
+socket.on('listening', () => {
+  var address = socket.address();
+  console.log(`server listening ${address.address}:${address.port}`);
+});
+
+socket.bind(3001);
+
 app.get('/', (req, res) => {
-  res.sendfile('index.html');
+  res.sendfile('public/index.html');
 });
 
-io.on('connect', (data) => {
-  const user = data.user;
-  const response = state.addUser(user);
-  io.push(respose);
-});
-
-io.on('request users', () => {
-  const activeUsers = state.requestUsers();
-  io.push(activeUsers);
-});
-
-io.on('disconnect', (data) => {
-  const user = data.user;
-  const response = state.requestUsers();
-  io.push(response);
-});
-
-io.on('broadcast', (data) => {
-  const message = data.message;
-  io.broadcast(message);
-})
-
-io.on('send message to user', (data) => {
-  const message = buildMessage(data);
-  io.push(data);
-});
-
-http.listen(3000, function(){
+http.listen(3000, () => {
   console.log('listening on *:3000');
 });
+

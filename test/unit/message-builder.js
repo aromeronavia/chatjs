@@ -6,7 +6,7 @@ const buildMessage = require('./../../core/message-builder');
 const ERROR_MESSAGE = 'Args are not complete';
 
 const EXPECTED_MESSAGE =
-  `<message>` +
+  `<message id="1">` +
     `<sender>Alberto</sender>` +
     `<receiver>Memo</receiver>` +
     `<message>message</message>` +
@@ -16,6 +16,7 @@ const EXPECTED_MESSAGE =
 describe('#MessageBuilder', () => {
   it('should return a valid XML', (done) => {
     const args = {
+      transactionId: 1,
       message: 'message',
       sender: 'Alberto',
       receiver: 'Memo',
@@ -29,6 +30,7 @@ describe('#MessageBuilder', () => {
 
   it('should throw an error with incomplete args', (done) => {
     const args = {
+      transactionId: 1,
       message: 'message',
       sender: 'Alberto'
     };

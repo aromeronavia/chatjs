@@ -5,7 +5,7 @@ const _ = require('lodash');
 const USER_EXISTS = {
   code: 500,
   message: 'user already exists'
-}
+};
 
 class State {
   constructor() {

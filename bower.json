@@ -1,0 +1,25 @@
+{
+  "name": "chat",
+  "description": "A simple chat for a final project at ITESO",
+  "main": "index.js",
+  "authors": [
+    "Alberto Romero and Guillermo Coronado"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "chat",
+    "jajasaludos"
+  ],
+  "homepage": "https://github.com/setzer777/chatjs",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "react": "^15.0.2"
+  }
+}
