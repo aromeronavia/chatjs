@@ -10,7 +10,7 @@ public class Proto {
         final DatagramSocket clientSocket = new DatagramSocket();
         final InetAddress inetAddress = InetAddress.getByName(IP_ADDRESS);
         byte[] sendData = new byte[1024];
-        sendData = "Que pedo".getBytes();
+        sendData = "<users id=\"1\"></users>".getBytes();
         DatagramPacket sendPackage = new DatagramPacket(sendData, sendData.length, inetAddress, 3001);
 
         try {
@@ -31,7 +31,7 @@ public class Proto {
         String xmlResponse = new String(receivePacket.getData());
         System.out.println(xmlResponse);
 
-        sendData = "Que pedo".getBytes();
+        sendData = "<users id=\"1\"></users>".getBytes();
         sendPackage = new DatagramPacket(sendData, sendData.length, inetAddress, 3001);
 
         try {

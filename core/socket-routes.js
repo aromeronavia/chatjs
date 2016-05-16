@@ -17,10 +17,15 @@ socket.on('error', (err) => {
 });
 
 socket.on('message', (message, rinfo) => {
-  console.log(`server got: ${message} from ${rinfo.address}:${rinfo.port}`);
-  const response = messagesHandler.handleMessage(message);
-  socket.send(response, 0, response.length, rinfo.port, 'localhost', (error) => {
-    console.log('error', error);
+  const address = rinfo.address;
+  const port = rinfo.port;
+
+  console.log(`server got: ${message} from ${address}:${port}`);
+  messagesHandler.handleMessage(message, (error, response) => {
+    console.log('response to deliver', response);
+    socket.send(response, 0, response.length, port, address, (error) => {
+      console.log('error', error);
+    });
   });
 });
 

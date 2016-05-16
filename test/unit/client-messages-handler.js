@@ -53,5 +53,17 @@ describe('#ClientMessagesHandler', () => {
       done();
     });
   });
+
+  it('should add a user and return the user list', (done) => {
+    const clientMessage = '<adduser id="1">alberto</adduser>';
+    const EXPECTED_USERS_LIST = ['alberto'];
+
+    controller.handleMessage(clientMessage, (error, response) => {
+      if (error) return done(error);
+      expect(_.isEqual(state.requestUsers(), EXPECTED_USERS_LIST)).to.be.equal(true);
+      expect(_.isEqual(response, EXPECTED_USERS_LIST)).to.be.equal(true);
+      done();
+    });
+  });
 });
 

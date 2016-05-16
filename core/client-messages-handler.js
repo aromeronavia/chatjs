@@ -18,10 +18,10 @@ class ClientMessagesHandler {
   _parseClientMessage(message, callback) {
     parseString(message, (error, response) => {
       const type = this._getType(response);
-      console.log(response);
       if (type === 'message') return this._parseMessage(response, callback);
       if (type === 'users') return this._getUsers(response, callback);
       if (type === 'ack') return callback(null, {status: 'ok'});
+      if (type === 'adduser') return this._addUser(response, callback);
     });
   }
 
@@ -79,6 +79,16 @@ class ClientMessagesHandler {
 
   _getTransactionId(xmlObject) {
     return xmlObject.users.$.id;
+  }
+
+  _addUser(xmlObject, callback) {
+    const user = this._getUser(xmlObject);
+    const userList = this.state.addUser(user);
+    return callback(null, userList);
+  }
+
+  _getUser(xmlObject) {
+    return xmlObject.adduser._;
   }
 }
 
