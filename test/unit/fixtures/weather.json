@@ -1,0 +1,39 @@
+{
+	"coord": {
+		"lon": -103.33,
+		"lat": 20.67
+	},
+	"weather": [{
+		"id": 804,
+		"main": "Clouds",
+		"description": "overcast clouds",
+		"icon": "04d"
+	}],
+	"base": "cmc stations",
+	"main": {
+		"temp": 302.093,
+		"pressure": 845.42,
+		"humidity": 23,
+		"temp_min": 302.093,
+		"temp_max": 302.093,
+		"sea_level": 1020.18,
+		"grnd_level": 845.42
+	},
+	"wind": {
+		"speed": 2.62,
+		"deg": 284.002
+	},
+	"clouds": {
+		"all": 88
+	},
+	"dt": 1463440104,
+	"sys": {
+		"message": 0.0026,
+		"country": "MX",
+		"sunrise": 1463400914,
+		"sunset": 1463448267
+	},
+	"id": 4005539,
+	"name": "Guadalajara",
+	"cod": 200
+}

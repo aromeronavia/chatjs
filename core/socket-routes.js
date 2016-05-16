@@ -23,8 +23,8 @@ socket.on('message', (message, rinfo) => {
   console.log(`server got: ${message} from ${address}:${port}`);
   messagesHandler.handleMessage(message, (error, response) => {
     console.log('response to deliver', response);
-    socket.send(response, 0, response.length, port, address, (error) => {
-      console.log('error', error);
+    socket.send(response, 0, response.length, port, address, (err) => {
+      console.log('error', err);
     });
   });
 });

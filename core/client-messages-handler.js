@@ -18,7 +18,7 @@ class ClientMessagesHandler {
   _parseClientMessage(message, callback) {
     parseString(message, (error, response) => {
       const type = this._getType(response);
-      if (type === 'message') return this._parseMessage(response, callback);
+      if (type === 'message') return this._buildMessage(response, callback);
       if (type === 'users') return this._getUsers(response, callback);
       if (type === 'ack') return callback(null, {status: 'ok'});
       if (type === 'adduser') return this._addUser(response, callback);
@@ -29,7 +29,7 @@ class ClientMessagesHandler {
     return Object.keys(parsedXML)[0];
   }
 
-  _parseMessage(parsedXML, callback) {
+  _buildMessage(parsedXML, callback) {
     const message = this._getMessage(parsedXML);
     const sender = this._getSender(parsedXML);
     const receiver = this._getReceiver(parsedXML);
