@@ -4,7 +4,7 @@
   "description": "A simple chat for a final project at ITESO",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test/unit/",
+    "test": "mocha test/unit/ && mocha test/integration/",
     "start": "node core/socket-routes.js"
   },
   "repository": {

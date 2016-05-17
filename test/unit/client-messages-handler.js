@@ -41,12 +41,12 @@ describe('#ClientMessagesHandler', () => {
 
     controller.handleMessage(args, (error, response) => {
       if (error) return done(error);
-      expect(response).to.be.equal(EXPECTED_USERS_LIST_RESPONSE);
+      expect(response.message).to.be.equal(EXPECTED_USERS_LIST_RESPONSE);
       done();
     });
   });
 
-  it('should give a valid response for a message request', (done) => {
+  it('should throw an error response for a message request if no user is in the State', (done) => {
     const clientMessage = '<message id="1">' +
                             '<sender>alberto</sender>' +
                             '<receiver>roberto</receiver>' +
@@ -60,8 +60,7 @@ describe('#ClientMessagesHandler', () => {
     };
 
     controller.handleMessage(args, (error, response) => {
-      if (error) return done(error);
-      expect(response).to.exist;
+      expect(error).to.exist;
       done();
     });
   });
@@ -84,7 +83,7 @@ describe('#ClientMessagesHandler', () => {
 
   it('should add a user and return the user list', (done) => {
     const clientMessage = '<adduser id="1">alberto</adduser>';
-    const EXPECTED_USERS_LIST = ['alberto'];
+    const EXPECTED_USERS_LIST = '<users id="1"><user>alberto</user></users>';
 
     const args = {
       message: clientMessage,
@@ -94,8 +93,8 @@ describe('#ClientMessagesHandler', () => {
 
     controller.handleMessage(args, (error, response) => {
       if (error) return done(error);
-      expect(_.isEqual(state.requestUsers(), EXPECTED_USERS_LIST)).to.be.equal(true);
-      expect(_.isEqual(response, EXPECTED_USERS_LIST)).to.be.equal(true);
+
+      expect(response.message === EXPECTED_USERS_LIST).to.be.equal(true);
       done();
     });
   });

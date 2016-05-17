@@ -22,4 +22,3 @@ const buildMessage = function(args) {
 };
 
 module.exports = buildMessage;
-

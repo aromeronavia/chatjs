@@ -1,7 +1,5 @@
 'use strict';
 
-const app = require('express')();
-const http = require('http').Server(app);
 const dgram = require('dgram');
 const socket = dgram.createSocket('udp4');
 
@@ -9,7 +7,7 @@ const ClientMessagesHandler = require('./client-messages-handler.js');
 const State = require('./state.js');
 let state = new State();
 
-const messagesHandler = new ClientMessagesHandler(state);
+let messagesHandler = new ClientMessagesHandler(state);
 
 socket.on('error', (err) => {
   console.log(`server error:\n${err.stack}`);
@@ -17,20 +15,27 @@ socket.on('error', (err) => {
 });
 
 socket.on('message', (message, rinfo) => {
+  if ('' + message === 'reset') {
+    state = new State();
+    messagesHandler = new ClientMessagesHandler(state);
+    return;
+  }
+
   const address = rinfo.address;
   const port = rinfo.port;
   const args = {
-    message: message,
+    message: '' + message,
     ip: address,
     port: port
   };
 
-  console.log('args', args);
-
   console.log(`server got: ${message} from ${address}:${port}`);
   messagesHandler.handleMessage(args, (error, response) => {
     console.log('response to deliver', response);
-    socket.send(response, 0, response.length, port, address, (err) => {
+    const portToReply = response.port || port;
+    const addressToReply = response.ip || address;
+    const reply = new Buffer('' + response.message);
+    socket.send(reply, 0, reply.length, portToReply, addressToReply, (err) => {
       console.log('error', err);
     });
   });
@@ -43,11 +48,4 @@ socket.on('listening', () => {
 
 socket.bind(3001);
 
-app.get('/', (req, res) => {
-  res.sendfile('public/index.html');
-});
-
-http.listen(3000, () => {
-  console.log('listening on *:3000');
-});
-
+module.exports = socket;

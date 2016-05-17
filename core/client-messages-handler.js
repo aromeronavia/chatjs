@@ -11,13 +11,14 @@ class ClientMessagesHandler {
 
   handleMessage(args, callback) {
     this._parseClientMessage(args, (error, response) => {
-      return callback(null, response);
+      return callback(error, response);
     });
   }
 
   _parseClientMessage(args, callback) {
     const message = args.message;
     parseString(message, (error, response) => {
+      console.log(response);
       const type = this._getType(response);
       if (type === 'adduser') {
         const addUserArgs = {
@@ -27,7 +28,7 @@ class ClientMessagesHandler {
         };
         return this._addUser(addUserArgs, callback);
       }
-      if (type === 'message') return this._buildMessage(response, callback);
+      if (type === 'message') return this._getMessageToSend(response, callback);
       if (type === 'users') return this._getUsers(response, callback);
       if (type === 'ack') return callback(null, {status: 'ok'});
     });
@@ -37,7 +38,7 @@ class ClientMessagesHandler {
     return Object.keys(parsedXML)[0];
   }
 
-  _buildMessage(parsedXML, callback) {
+  _getMessageToSend(parsedXML, callback) {
     const message = this._getMessage(parsedXML);
     const sender = this._getSender(parsedXML);
     const receiver = this._getReceiver(parsedXML);
@@ -52,8 +53,21 @@ class ClientMessagesHandler {
       hour: hour
     };
 
+    let receiverAddress;
+    try {
+      receiverAddress = this.state.getAddressFromUser(receiver);
+    } catch (error) {
+      return callback(error);
+    }
+
     const buildMessage = responseFactory('message');
-    return callback(null, buildMessage(messageArgs));
+    const response = {
+      message: buildMessage(messageArgs),
+      ip: receiverAddress.ip,
+      port: receiverAddress.port
+    };
+
+    return callback(null, response);
   }
 
   _getMessage(parsedXML) {
@@ -81,7 +95,9 @@ class ClientMessagesHandler {
       users: users
     };
 
-    const response = buildUsersList(args);
+    const response = {
+      message: buildUsersList(args)
+    };
     return callback(null, response);
   }
 
@@ -90,6 +106,7 @@ class ClientMessagesHandler {
   }
 
   _addUser(args, callback) {
+    const buildUsersList = responseFactory('users');
     const parsedXML = args.parsedXML;
     const user = this._getUser(parsedXML);
     const addUserArgs = {
@@ -97,14 +114,27 @@ class ClientMessagesHandler {
       ip: args.ip,
       port: args.port
     };
+
+    const transactionId = this._getTransactionIdFromAddUser(parsedXML);
     const userList = this.state.addUser(addUserArgs);
-    return callback(null, userList);
+    const buildListArgs = {
+      transactionId: transactionId,
+      users: userList
+    };
+
+    const response = {
+      message: buildUsersList(buildListArgs)
+    };
+    return callback(null, response);
   }
 
   _getUser(xmlObject) {
     return xmlObject.adduser._;
   }
+
+  _getTransactionIdFromAddUser(xmlObject) {
+    return xmlObject.adduser.$.id;
+  }
 }
 
 module.exports = ClientMessagesHandler;
-

@@ -35,9 +35,24 @@ class State {
     return userList;
   }
 
+  getAddressFromUser(user) {
+    const userFound = _.find(this.connectedUsers, (userObject) => {
+      return userObject.user === user;
+    });
+
+    if (!userFound) throw new Error('User is not found');
+
+    const response = {
+      ip: userFound.ip,
+      port: userFound.port
+    };
+
+    return response;
+  }
+
   _userExists(user) {
     const userFound = _.find(this.connectedUsers, (userObject) => {
-      return userObject.name === user;
+      return userObject.user === user;
     });
 
     return userFound;
