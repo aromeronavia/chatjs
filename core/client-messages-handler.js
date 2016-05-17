@@ -18,7 +18,6 @@ class ClientMessagesHandler {
   _parseClientMessage(args, callback) {
     const message = args.message;
     parseString(message, (error, response) => {
-      console.log(response);
       const type = this._getType(response);
       if (type === 'adduser') {
         const addUserArgs = {
@@ -28,17 +27,23 @@ class ClientMessagesHandler {
         };
         return this._addUser(addUserArgs, callback);
       }
-      if (type === 'message') return this._getMessageToSend(response, callback);
+      if (type === 'message') return this._handleMessage(response, callback);
       if (type === 'users') return this._getUsers(response, callback);
       if (type === 'ack') return callback(null, {status: 'ok'});
     });
   }
 
-  _getType(parsedXML) {
-    return Object.keys(parsedXML)[0];
+  _handleMessage(parsedXML, callback) {
+    const receiver = this._getReceiver(parsedXML);
+    const builtMessage = this._buildMessage(parsedXML);
+    if (receiver === 'all') return this._broadcastMessage(builtMessage, callback);
+
+    return this._sendMessage(builtMessage, receiver, callback);
   }
 
-  _getMessageToSend(parsedXML, callback) {
+  _buildMessage(parsedXML) {
+    const buildMessage = responseFactory('message');
+
     const message = this._getMessage(parsedXML);
     const sender = this._getSender(parsedXML);
     const receiver = this._getReceiver(parsedXML);
@@ -53,6 +58,11 @@ class ClientMessagesHandler {
       hour: hour
     };
 
+    const builtMessage = buildMessage(messageArgs);
+    return builtMessage;
+  }
+
+  _sendMessage(builtMessage, receiver, callback) {
     let receiverAddress;
     try {
       receiverAddress = this.state.getAddressFromUser(receiver);
@@ -60,9 +70,9 @@ class ClientMessagesHandler {
       return callback(error);
     }
 
-    const buildMessage = responseFactory('message');
     const response = {
-      message: buildMessage(messageArgs),
+      intent: 'send',
+      message: builtMessage,
       ip: receiverAddress.ip,
       port: receiverAddress.port
     };
@@ -70,20 +80,21 @@ class ClientMessagesHandler {
     return callback(null, response);
   }
 
-  _getMessage(parsedXML) {
-    return parsedXML.message.message;
-  }
+  _broadcastMessage(builtMessage, callback) {
+    const allAddresses = this.getAllUsersAdresses();
+    const message = allAddresses.map((obj) => {
+      return {
+        message: builtMessage,
+        ip: obj.ip,
+        port: obj.port
+      };
+    });
+    const response = {
+      intent: 'broadcast',
+      message: message
+    };
 
-  _getSender(parsedXML) {
-    return parsedXML.message.sender;
-  }
-
-  _getReceiver(parsedXML) {
-    return parsedXML.message.receiver;
-  }
-
-  _getTransactionIdFromMessage(parsedXML) {
-    return parsedXML.message.$.id;
+    return callback(null, response);
   }
 
   _getUsers(xmlObject, callback) {
@@ -96,13 +107,10 @@ class ClientMessagesHandler {
     };
 
     const response = {
+      intent: 'send',
       message: buildUsersList(args)
     };
     return callback(null, response);
-  }
-
-  _getTransactionId(xmlObject) {
-    return xmlObject.users.$.id;
   }
 
   _addUser(args, callback) {
@@ -123,6 +131,7 @@ class ClientMessagesHandler {
     };
 
     const response = {
+      intent: 'send',
       message: buildUsersList(buildListArgs)
     };
     return callback(null, response);
@@ -134,6 +143,34 @@ class ClientMessagesHandler {
 
   _getTransactionIdFromAddUser(xmlObject) {
     return xmlObject.adduser.$.id;
+  }
+
+  getAllUsersAdresses() {
+    return this.state.getAllAddresses();
+  }
+
+  _getMessage(parsedXML) {
+    return parsedXML.message.message[0];
+  }
+
+  _getSender(parsedXML) {
+    return parsedXML.message.sender[0];
+  }
+
+  _getReceiver(parsedXML) {
+    return parsedXML.message.receiver[0];
+  }
+
+  _getTransactionId(xmlObject) {
+    return xmlObject.users.$.id;
+  }
+
+  _getTransactionIdFromMessage(parsedXML) {
+    return parsedXML.message.$.id;
+  }
+
+  _getType(parsedXML) {
+    return Object.keys(parsedXML)[0];
   }
 }
 

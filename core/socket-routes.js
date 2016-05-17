@@ -9,6 +9,42 @@ let state = new State();
 
 let messagesHandler = new ClientMessagesHandler(state);
 
+const sendMessage = function(response, address, port) {
+  const portToReply = response.port || port;
+  const addressToReply = response.ip || address;
+  const reply = new Buffer('' + response.message);
+  socket.send(reply, 0, reply.length, portToReply, addressToReply, (err) => {
+    console.log('error', err);
+  });
+};
+
+const broadcastMessage = function(response, address, port) {
+  const messages = response.message;
+  messages.forEach((message) => {
+    const portToReply = message.port || port;
+    const addressToReply = message.ip || address;
+    const reply = new Buffer('' + message.message);
+    socket.send(reply, 0, reply.length, portToReply, addressToReply, (err) => {
+      console.log('error', err);
+    });
+  });
+};
+
+const deliverResponse = function(error, response, address, port) {
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  console.log('response to deliver', response);
+  const intent = response.intent;
+  if (intent === 'send') sendMessage(response, address, port);
+  else if (intent === 'broadcast') broadcastMessage(response, address, port);
+  else {
+    console.error('intent', intent, 'is not allowed');
+  }
+};
+
 socket.on('error', (err) => {
   console.log(`server error:\n${err.stack}`);
   socket.close();
@@ -31,13 +67,7 @@ socket.on('message', (message, rinfo) => {
 
   console.log(`server got: ${message} from ${address}:${port}`);
   messagesHandler.handleMessage(args, (error, response) => {
-    console.log('response to deliver', response);
-    const portToReply = response.port || port;
-    const addressToReply = response.ip || address;
-    const reply = new Buffer('' + response.message);
-    socket.send(reply, 0, reply.length, portToReply, addressToReply, (err) => {
-      console.log('error', err);
-    });
+    deliverResponse(error, response, address, port);
   });
 });
 

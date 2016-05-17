@@ -5,6 +5,8 @@ const expect = chai.expect;
 const dgram = require('dgram');
 
 require('./../../core/socket-routes.js');
+
+const MESSAGE_REGEX = new RegExp(/<message id="1"><sender>.*<\/sender><receiver>.*<\/receiver><message>.*<\/message><hour>\d\d:\d\d:\d\d<\/hour><\/message>/);
 describe('#Application routes', () => {
   let socket;
   beforeEach((done) => {
@@ -21,9 +23,7 @@ describe('#Application routes', () => {
       done();
     });
     const message = '<adduser id="1">alberto</adduser>';
-    socket.send(new Buffer(message), 0, message.length, 3001, '127.0.0.1', (error) => {
-      console.log(error);
-    });
+    socket.send(new Buffer(message), 0, message.length, 3001, '127.0.0.1', () => {});
   });
 
   it('should get an empty list of users when no users are connected', (done) => {
@@ -34,8 +34,67 @@ describe('#Application routes', () => {
       done();
     });
     const message = '<users id="1"></users>';
-    socket.send(new Buffer(message), 0, message.length, 3001, '127.0.0.1', (error) => {
-      console.log(error);
+    socket.send(new Buffer(message), 0, message.length, 3001, '127.0.0.1', () => {});
+  });
+
+  it('should add two users and get a list with two users', (done) => {
+    const EXPECTED_RESPONSE = '<users id="2"><user>alberto</user><user>roberto</user></users>';
+    socket.on('message', (response) => {
+      const messageResponse = response + '';
+      if (messageResponse === EXPECTED_RESPONSE) done();
     });
+    let message = '<adduser id="1">alberto</adduser>';
+    socket.send(new Buffer(message), 0, message.length, 3001, '127.0.0.1', () => {});
+    message = '<adduser id="2">roberto</adduser>';
+    socket.send(new Buffer(message), 0, message.length, 3001, '127.0.0.1', () => {});
+  });
+
+  it('should send a message to a specific port', (done) => {
+    const socketClient = dgram.createSocket('udp4');
+    socketClient.on('message', (response) => {
+      const message = response + '';
+      if (MESSAGE_REGEX.test(message)) done();
+    });
+
+    socketClient.bind(3003);
+    let message = '<adduser id="2">roberto</adduser>';
+    socketClient.send(new Buffer(message), 0, message.length, 3001, '127.0.0.1', () => {
+      message = '<message id="1"><sender>alberto</sender><receiver>roberto</receiver><message>quepedo</message></message>';
+      socketClient.send(new Buffer(message), 0, message.length, 3001, '127.0.0.1', () => {});
+    });
+  });
+
+  it('should send a broadcast to all the users in the state', (done) => {
+    let numberOfMessagesReceived = 0;
+    const socketClient = dgram.createSocket('udp4');
+    socketClient.on('message', (response) => {
+      const message = response + '';
+      console.log('arrived message socket 1', message);
+      if (MESSAGE_REGEX.test(message)) {
+        numberOfMessagesReceived += 1;
+        if (numberOfMessagesReceived === 2) done();
+      }
+    });
+
+    socketClient.bind(3004);
+
+    const socketClient2 = dgram.createSocket('udp4');
+    socketClient2.on('message', (response) => {
+      const message = response + '';
+      console.log('arrived message socket 2', message);
+      if (MESSAGE_REGEX.test(message)) {
+        numberOfMessagesReceived += 1;
+        if (numberOfMessagesReceived === 2) done();
+      }
+    });
+
+    socketClient2.bind(3005);
+
+    let addRoberto = '<adduser id="2">roberto</adduser>';
+    let addAlberto = '<adduser id="3">alberto</adduser>';
+    socketClient.send(new Buffer(addRoberto), 0, addRoberto.length, 3001, '127.0.0.1', () => {});
+    socketClient2.send(new Buffer(addAlberto), 0, addAlberto.length, 3001, '127.0.0.1', () => {});
+    const message = '<message id="1"><sender>alberto</sender><receiver>all</receiver><message>quepedo</message></message>';
+    socketClient.send(new Buffer(message), 0, message.length, 3001, '127.0.0.1', () => {});
   });
 });

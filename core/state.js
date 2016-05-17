@@ -16,7 +16,8 @@ class State {
     const username = user.user;
     if (this._userExists(username)) return USER_EXISTS;
     this.connectedUsers.push(user);
-    return this.requestUsers();
+    const response = this.requestUsers();
+    return response;
   }
 
   removeUser(user) {
@@ -33,6 +34,17 @@ class State {
     });
 
     return userList;
+  }
+
+  getAllAddresses() {
+    const addresses = this.connectedUsers.map((user) => {
+      return {
+        ip: user.ip,
+        port: user.port
+      };
+    });
+
+    return addresses;
   }
 
   getAddressFromUser(user) {
