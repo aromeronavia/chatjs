@@ -14,9 +14,15 @@ describe('#State', () => {
   });
 
   it('should add an user and return the list of users', () => {
-    const user = 'alberto'
+    const user = {
+      user: 'alberto',
+      ip: '123.123.123.123',
+      port: 1234
+    };
+
     const listUsers = state.addUser(user);
-    expect(listUsers[0]).to.be.equal(user);
+    console.log(listUsers);
+    expect(listUsers[0]).to.be.equal(user.user);
   });
 
   it('should remove an existent user from the list', () => {
@@ -24,7 +30,11 @@ describe('#State', () => {
     const listOfUsers = ['alberto', 'roberto', 'pablo', 'vakero'];
     const expectedList = ['roberto', 'pablo', 'vakero'];
     listOfUsers.forEach((user) => {
-      state.addUser(user);
+      state.addUser({
+        user: user,
+        ip: '123.123.123.123',
+        port: 1234
+      });
     });
 
     const resultList = state.removeUser(user);

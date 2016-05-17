@@ -9,19 +9,27 @@ class ClientMessagesHandler {
     this.state = state;
   }
 
-  handleMessage(message, callback) {
-    this._parseClientMessage(message, (error, response) => {
+  handleMessage(args, callback) {
+    this._parseClientMessage(args, (error, response) => {
       return callback(null, response);
     });
   }
 
-  _parseClientMessage(message, callback) {
+  _parseClientMessage(args, callback) {
+    const message = args.message;
     parseString(message, (error, response) => {
       const type = this._getType(response);
+      if (type === 'adduser') {
+        const addUserArgs = {
+          parsedXML: response,
+          ip: args.ip,
+          port: args.port
+        };
+        return this._addUser(addUserArgs, callback);
+      }
       if (type === 'message') return this._buildMessage(response, callback);
       if (type === 'users') return this._getUsers(response, callback);
       if (type === 'ack') return callback(null, {status: 'ok'});
-      if (type === 'adduser') return this._addUser(response, callback);
     });
   }
 
@@ -81,9 +89,15 @@ class ClientMessagesHandler {
     return xmlObject.users.$.id;
   }
 
-  _addUser(xmlObject, callback) {
-    const user = this._getUser(xmlObject);
-    const userList = this.state.addUser(user);
+  _addUser(args, callback) {
+    const parsedXML = args.parsedXML;
+    const user = this._getUser(parsedXML);
+    const addUserArgs = {
+      user: user,
+      ip: args.ip,
+      port: args.port
+    };
+    const userList = this.state.addUser(addUserArgs);
     return callback(null, userList);
   }
 

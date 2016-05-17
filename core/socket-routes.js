@@ -19,9 +19,16 @@ socket.on('error', (err) => {
 socket.on('message', (message, rinfo) => {
   const address = rinfo.address;
   const port = rinfo.port;
+  const args = {
+    message: message,
+    ip: address,
+    port: port
+  };
+
+  console.log('args', args);
 
   console.log(`server got: ${message} from ${address}:${port}`);
-  messagesHandler.handleMessage(message, (error, response) => {
+  messagesHandler.handleMessage(args, (error, response) => {
     console.log('response to deliver', response);
     socket.send(response, 0, response.length, port, address, (err) => {
       console.log('error', err);

@@ -21,9 +21,25 @@ describe('#ClientMessagesHandler', () => {
 
   it('should give a valid response for a get users request', (done) => {
     const clientMessage = '<users id="1" hola="mundo">holi</users>';
-    state.addUser('alberto');
-    state.addUser('roberto');
-    controller.handleMessage(clientMessage, (error, response) => {
+    state.addUser({
+      user: 'alberto',
+      ip: '123.123.123.123',
+      port: 456
+    });
+
+    state.addUser({
+      user: 'roberto',
+      ip: '123.123.123.123',
+      port: 456
+    });
+
+    const args = {
+      message: clientMessage,
+      ip: '123.123.123.123',
+      port: 455
+    };
+
+    controller.handleMessage(args, (error, response) => {
       if (error) return done(error);
       expect(response).to.be.equal(EXPECTED_USERS_LIST_RESPONSE);
       done();
@@ -37,7 +53,13 @@ describe('#ClientMessagesHandler', () => {
                             '<message>quepedo</message>' +
                           '</message>';
 
-    controller.handleMessage(clientMessage, (error, response) => {
+    const args = {
+      message: clientMessage,
+      ip: '123.123.123.123',
+      port: 455
+    };
+
+    controller.handleMessage(args, (error, response) => {
       if (error) return done(error);
       expect(response).to.exist;
       done();
@@ -47,7 +69,13 @@ describe('#ClientMessagesHandler', () => {
   it('should give a valid response for an ack message', (done) => {
     const clientMessage = '<ack id="1" />';
 
-    controller.handleMessage(clientMessage, (error, response) => {
+    const args = {
+      message: clientMessage,
+      ip: '123.123.123.123',
+      port: 455
+    };
+
+    controller.handleMessage(args, (error, response) => {
       if (error) return done(error);
       expect(_.isEqual(response, EXPECTED_ACK_RESPONSE)).to.be.equal(true);
       done();
@@ -58,7 +86,13 @@ describe('#ClientMessagesHandler', () => {
     const clientMessage = '<adduser id="1">alberto</adduser>';
     const EXPECTED_USERS_LIST = ['alberto'];
 
-    controller.handleMessage(clientMessage, (error, response) => {
+    const args = {
+      message: clientMessage,
+      ip: '123.123.123.123',
+      port: 455
+    };
+
+    controller.handleMessage(args, (error, response) => {
       if (error) return done(error);
       expect(_.isEqual(state.requestUsers(), EXPECTED_USERS_LIST)).to.be.equal(true);
       expect(_.isEqual(response, EXPECTED_USERS_LIST)).to.be.equal(true);
