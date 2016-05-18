@@ -7,11 +7,13 @@ const dgram = require('dgram');
 require('./../../core/socket-routes.js');
 
 const MESSAGE_REGEX = new RegExp(/<message id="1"><sender>.*<\/sender><receiver>.*<\/receiver><message>.*<\/message><hour>\d\d:\d\d:\d\d<\/hour><\/message>/);
+
+const PORT = 9930;
 describe('#Application routes', () => {
   let socket;
   beforeEach((done) => {
     socket = dgram.createSocket('udp4');
-    socket.send(new Buffer('reset'), 0, 5, 3001, '127.0.0.1', () => {});
+    socket.send(new Buffer('reset'), 0, 5, PORT, '127.0.0.1', () => {});
     done();
   });
 
@@ -23,7 +25,7 @@ describe('#Application routes', () => {
       done();
     });
     const message = '<adduser id="1">alberto</adduser>';
-    socket.send(new Buffer(message), 0, message.length, 3001, '127.0.0.1', () => {});
+    socket.send(new Buffer(message), 0, message.length, PORT, '127.0.0.1', () => {});
   });
 
   it('should get an empty list of users when no users are connected', (done) => {
@@ -34,7 +36,7 @@ describe('#Application routes', () => {
       done();
     });
     const message = '<users id="1"></users>';
-    socket.send(new Buffer(message), 0, message.length, 3001, '127.0.0.1', () => {});
+    socket.send(new Buffer(message), 0, message.length, PORT, '127.0.0.1', () => {});
   });
 
   it('should add two users and get a list with two users', (done) => {
@@ -44,9 +46,9 @@ describe('#Application routes', () => {
       if (messageResponse === EXPECTED_RESPONSE) done();
     });
     let message = '<adduser id="1">alberto</adduser>';
-    socket.send(new Buffer(message), 0, message.length, 3001, '127.0.0.1', () => {});
+    socket.send(new Buffer(message), 0, message.length, PORT, '127.0.0.1', () => {});
     message = '<adduser id="2">roberto</adduser>';
-    socket.send(new Buffer(message), 0, message.length, 3001, '127.0.0.1', () => {});
+    socket.send(new Buffer(message), 0, message.length, PORT, '127.0.0.1', () => {});
   });
 
   it('should send a message to a specific port', (done) => {
@@ -58,9 +60,9 @@ describe('#Application routes', () => {
 
     socketClient.bind(3003);
     let message = '<adduser id="2">roberto</adduser>';
-    socketClient.send(new Buffer(message), 0, message.length, 3001, '127.0.0.1', () => {
+    socketClient.send(new Buffer(message), 0, message.length, PORT, '127.0.0.1', () => {
       message = '<message id="1"><sender>alberto</sender><receiver>roberto</receiver><message>quepedo</message></message>';
-      socketClient.send(new Buffer(message), 0, message.length, 3001, '127.0.0.1', () => {});
+      socketClient.send(new Buffer(message), 0, message.length, PORT, '127.0.0.1', () => {});
     });
   });
 
@@ -92,9 +94,9 @@ describe('#Application routes', () => {
 
     let addRoberto = '<adduser id="2">roberto</adduser>';
     let addAlberto = '<adduser id="3">alberto</adduser>';
-    socketClient.send(new Buffer(addRoberto), 0, addRoberto.length, 3001, '127.0.0.1', () => {});
-    socketClient2.send(new Buffer(addAlberto), 0, addAlberto.length, 3001, '127.0.0.1', () => {});
+    socketClient.send(new Buffer(addRoberto), 0, addRoberto.length, PORT, '127.0.0.1', () => {});
+    socketClient2.send(new Buffer(addAlberto), 0, addAlberto.length, PORT, '127.0.0.1', () => {});
     const message = '<message id="1"><sender>alberto</sender><receiver>all</receiver><message>quepedo</message></message>';
-    socketClient.send(new Buffer(message), 0, message.length, 3001, '127.0.0.1', () => {});
+    socketClient.send(new Buffer(message), 0, message.length, PORT, '127.0.0.1', () => {});
   });
 });

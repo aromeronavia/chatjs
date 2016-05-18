@@ -1,5 +1,4 @@
-/*jshint esversion: 6 */
-"use strict";
+'use strict';
 
 const buildAcknowledge = function(args) {
   const transactionId = args.transactionId;
@@ -9,4 +8,3 @@ const buildAcknowledge = function(args) {
 };
 
 module.exports = buildAcknowledge;
-

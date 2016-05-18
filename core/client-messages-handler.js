@@ -1,6 +1,6 @@
 'use strict';
 
-const responseFactory = require('./response-builder-factory');
+const responseFactory = require('./response-builder-factory.js');
 const parseString = require('xml2js').parseString;
 const moment = require('moment');
 
@@ -19,6 +19,8 @@ class ClientMessagesHandler {
     const message = args.message;
     parseString(message, (error, response) => {
       const type = this._getType(response);
+      if (type === 'heartbeat') return this._assertUser(args);
+      if (type === 'file') return this._sendFile(args);
       if (type === 'adduser') {
         const addUserArgs = {
           parsedXML: response,
@@ -39,6 +41,10 @@ class ClientMessagesHandler {
     if (receiver === 'all') return this._broadcastMessage(builtMessage, callback);
 
     return this._sendMessage(builtMessage, receiver, callback);
+  }
+
+  _sendFile(args) {
+
   }
 
   _buildMessage(parsedXML) {
@@ -89,6 +95,7 @@ class ClientMessagesHandler {
         port: obj.port
       };
     });
+
     const response = {
       intent: 'broadcast',
       message: message

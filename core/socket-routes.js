@@ -9,21 +9,47 @@ let state = new State();
 
 let messagesHandler = new ClientMessagesHandler(state);
 
+const heartBeat = function () {
+  setInterval(() => {
+    console.log('each second');
+    const message = '<heartbeat />';
+    const args = prepareMessageForBroadcast(message);
+    broadcastMessage(args);
+  }, 1000);
+};
+
+const prepareMessageForBroadcast = function (message) {
+  const addresses = state.getAllAddresses();
+  const args = {
+    message: addresses.map((address) => {
+      return {
+        message: message,
+        ip: address.ip,
+        port: address.port
+      };
+    })
+  };
+  console.log(args);
+  return args;
+};
+
 const sendMessage = function(response, address, port) {
   const portToReply = response.port || port;
   const addressToReply = response.ip || address;
   const reply = new Buffer('' + response.message);
+  console.log('sending reply', reply);
   socket.send(reply, 0, reply.length, portToReply, addressToReply, (err) => {
     console.log('error', err);
   });
 };
 
-const broadcastMessage = function(response, address, port) {
-  const messages = response.message;
+const broadcastMessage = function(args, address, port) {
+  const messages = args.message;
   messages.forEach((message) => {
     const portToReply = message.port || port;
     const addressToReply = message.ip || address;
     const reply = new Buffer('' + message.message);
+    console.log('reply broadcast', reply + '');
     socket.send(reply, 0, reply.length, portToReply, addressToReply, (err) => {
       console.log('error', err);
     });
@@ -40,6 +66,7 @@ const deliverResponse = function(error, response, address, port) {
   const intent = response.intent;
   if (intent === 'send') sendMessage(response, address, port);
   else if (intent === 'broadcast') broadcastMessage(response, address, port);
+  else if (intent === 'sendAndAcknowledge') sendAndAcknowledgeMessage(response, address, port);
   else {
     console.error('intent', intent, 'is not allowed');
   }
@@ -74,8 +101,9 @@ socket.on('message', (message, rinfo) => {
 socket.on('listening', () => {
   var address = socket.address();
   console.log(`server listening ${address.address}:${address.port}`);
+  heartBeat();
 });
 
-socket.bind(3001);
+socket.bind(9930);
 
 module.exports = socket;

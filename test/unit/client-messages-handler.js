@@ -8,6 +8,8 @@ const _ = require('lodash');
 
 const EXPECTED_USERS_LIST_RESPONSE = '<users id="1"><user>alberto</user><user>roberto</user></users>';
 
+const MESSAGE_REGEX = new RegExp(/<message id="1"><sender>.*<\/sender><receiver>.*<\/receiver><message>.*<\/message><hour>\d\d:\d\d:\d\d<\/hour><\/message>/);
+
 const EXPECTED_ACK_RESPONSE = {status: 'ok'};
 
 describe('#ClientMessagesHandler', () => {
@@ -95,6 +97,30 @@ describe('#ClientMessagesHandler', () => {
       if (error) return done(error);
 
       expect(response.message === EXPECTED_USERS_LIST).to.be.equal(true);
+      done();
+    });
+  });
+
+  it('should deliver a formed message to a user with its ip and port', (done) => {
+    const clientMessage = '<message id="1">' +
+                            '<sender>alberto</sender>' +
+                            '<receiver>roberto</receiver>' +
+                            '<message>quepedo</message>' +
+                          '</message>';
+    state.addUser({
+      user: 'roberto',
+      ip: '123.123.123.123',
+      port: 456
+    });
+
+    const args = {
+      message: clientMessage,
+      ip: '127.0.0.1',
+      port: 4000
+    }
+
+    controller.handleMessage(args, (error, response) => {
+      expect(MESSAGE_REGEX.test(response.message)).to.be.equal(true);
       done();
     });
   });
