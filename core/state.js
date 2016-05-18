@@ -16,7 +16,6 @@ class State {
   addUser(user) {
     const username = user.user;
     if (this._userExists(username)) return USER_EXISTS;
-    user.hour = moment('hh:mm:ss');
     this.connectedUsers.push(user);
     const response = this.requestUsers();
     return response;
@@ -58,9 +57,10 @@ class State {
   }
 
   assertUser(ip, port) {
-    const user = this._findUserByIdAndPort(ip, port);
+    const user = this._findUserByIpAndPort(ip, port);
     const hour = moment(user.hour);
-    if (hour.diff(moment('hh:mm:ss', 'seconds', true)) > 10) {
+    const secondsDiff = hour.diff(moment(), 'seconds', true);
+    if (secondsDiff > 10) {
       this.removeUser(user.user);
     }
   }

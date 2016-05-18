@@ -167,13 +167,15 @@ class ClientMessagesHandler {
     const buildUsersList = responseFactory(type, client);
     const parsedXML = args.parsedXML;
     const user = this._getUser(parsedXML);
+    const transactionId = this._getTransactionId(parsedXML, 'adduser');
+
     const addUserArgs = {
       user: user,
       ip: args.ip,
-      port: args.port
+      port: args.port,
+      hour: moment().format('hh:mm:ss')
     };
 
-    const transactionId = this._getTransactionId(parsedXML, 'adduser');
     const userList = this.state.addUser(addUserArgs);
     const buildListArgs = {
       transactionId: transactionId,

@@ -203,4 +203,25 @@ describe('#ClientMessagesHandler', () => {
       done();
     });
   });
+
+  it('should reply well with a heartbeat', (done) => {
+    const clientMessage = '<heartbeat />';
+
+    state.addUser({
+      user: 'roberto',
+      ip: '123.123.123.123',
+      port: 1255
+    });
+
+    const args = {
+      message: clientMessage,
+      ip: '123.123.123.123',
+      port: 1255
+    }
+
+    controller.handleMessage(args, (error, response) => {
+      expect(response.intent).to.be.equal('none');
+      done();
+    });
+  });
 });
