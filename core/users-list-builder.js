@@ -16,4 +16,3 @@ const buildUsersList = function(args) {
 };
 
 module.exports = buildUsersList;
-

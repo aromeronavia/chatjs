@@ -10,16 +10,23 @@ class ClientMessagesHandler {
   }
 
   handleMessage(args, callback) {
-    this._parseClientMessage(args, (error, response) => {
-      return callback(error, response);
-    });
+    const port = args.port;
+    if (this._messageComesFromServer(port)) {
+      this._parseServerMessage(args, 'server', (error, response) => {
+        return callback(error, response);
+      });
+    } else {
+      this._parseClientMessage(args, 'client', (error, response) => {
+        return callback(error, response);
+      });
+    }
   }
 
-  _parseClientMessage(args, callback) {
+  _parseClientMessage(args, client, callback) {
     const message = args.message;
     parseString(message, (error, response) => {
       const type = this._getType(response);
-      if (type === 'heartbeat') return this._assertUser(args, callback);
+      if (type === 'heartbeat') return this._assertUser(args, client, callback);
       if (type === 'file') return this._sendFile(response, callback);
       if (type === 'adduser') {
         const addUserArgs = {
@@ -27,15 +34,15 @@ class ClientMessagesHandler {
           ip: args.ip,
           port: args.port
         };
-        return this._addUser(addUserArgs, callback);
+        return this._addUser(addUserArgs, client, callback);
       }
-      if (type === 'message') return this._handleMessage(response, callback);
-      if (type === 'users') return this._getUsers(response, callback);
+      if (type === 'message') return this._handleMessage(response, client, callback);
+      if (type === 'users') return this._getUsers(response, client, callback);
       if (type === 'ack') return callback(null, {status: 'ok'});
     });
   }
 
-  _handleMessage(parsedXML, callback) {
+  _handleMessage(parsedXML, client, callback) {
     const type = 'message';
     const receiver = this._getReceiver(parsedXML, type);
     const builtMessage = this._buildMessage(parsedXML, type);
@@ -71,7 +78,7 @@ class ClientMessagesHandler {
 
   _buildMessage(parsedXML) {
     const type = 'message';
-    const buildMessage = responseFactory(type);
+    const buildMessage = responseFactory(type, client);
 
     const message = this._getMessage(parsedXML, type);
     const sender = this._getSender(parsedXML, type);
@@ -130,10 +137,10 @@ class ClientMessagesHandler {
     return callback(null, response);
   }
 
-  _getUsers(xmlObject, callback) {
+  _getUsers(xmlObject, client, callback) {
     const type = 'users';
 
-    const buildUsersList = responseFactory(type);
+    const buildUsersList = responseFactory(type, client);
     const transactionId = this._getTransactionId(xmlObject, type);
     const users = this.state.requestUsers();
     const args = {
@@ -148,9 +155,9 @@ class ClientMessagesHandler {
     return callback(null, response);
   }
 
-  _addUser(args, callback) {
+  _addUser(args, client, callback) {
     const type = 'users';
-    const buildUsersList = responseFactory(type);
+    const buildUsersList = responseFactory(type, client);
     const parsedXML = args.parsedXML;
     const user = this._getUser(parsedXML);
     const addUserArgs = {
