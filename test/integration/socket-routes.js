@@ -8,7 +8,8 @@ require('./../../core/socket-routes.js');
 
 const MESSAGE_REGEX = new RegExp(/<message id="1"><sender>.*<\/sender><receiver>.*<\/receiver><message>.*<\/message><hour>\d\d:\d\d:\d\d<\/hour><\/message>/);
 
-const PORT = 9930;
+const PORT = 9940;
+
 describe('#Application routes', () => {
   let socket;
   beforeEach((done) => {
@@ -97,6 +98,43 @@ describe('#Application routes', () => {
     socketClient.send(new Buffer(addRoberto), 0, addRoberto.length, PORT, '127.0.0.1', () => {});
     socketClient2.send(new Buffer(addAlberto), 0, addAlberto.length, PORT, '127.0.0.1', () => {});
     const message = '<message id="1"><sender>alberto</sender><receiver>all</receiver><message>quepedo</message></message>';
+    socketClient.send(new Buffer(message), 0, message.length, PORT, '127.0.0.1', () => {});
+  });
+
+  it('should return a valid response knowing the server is calling from a message', (done) => {
+    const socketClient = dgram.createSocket('udp4');
+    const EXPECTED_SERVER_MESSAGE = '<message><id>1</id><client>alberto</client><receiver>roberto</receiver><message>quepedo</message></message>';
+    socketClient.on('message', (response) => {
+      const message = response + '';
+      console.log('arrived message socket 1', message);
+      if (message === EXPECTED_SERVER_MESSAGE) {
+        socketClient.close();
+        done();
+      }
+    });
+
+    socketClient.bind(9930);
+
+    let addRoberto = '<adduser id="2">roberto</adduser>';
+    socketClient.send(new Buffer(addRoberto), 0, addRoberto.length, PORT, '127.0.0.1', () => {});
+    const message = '<message id="1"><sender>alberto</sender><receiver>roberto</receiver><message>quepedo</message></message>';
+    socketClient.send(new Buffer(message), 0, message.length, PORT, '127.0.0.1', () => {});
+  });
+
+  it('should return a valid response knowing the server is calling from a message', (done) => {
+    const socketClient = dgram.createSocket('udp4');
+    const EXPECTED_SERVER_MESSAGE = '<clientList><id>1</id><clientList>roberto</clientList></clientList>';
+    socketClient.on('message', (response) => {
+      const message = response + '';
+      console.log('arrived message socket 1', message);
+      if (message === EXPECTED_SERVER_MESSAGE) done();
+    });
+
+    socketClient.bind(9930);
+
+    let addRoberto = '<adduser id="2">roberto</adduser>';
+    socketClient.send(new Buffer(addRoberto), 0, addRoberto.length, PORT, '127.0.0.1', () => {});
+    const message = '<users id="1"></users>';
     socketClient.send(new Buffer(message), 0, message.length, PORT, '127.0.0.1', () => {});
   });
 });

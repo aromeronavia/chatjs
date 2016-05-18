@@ -12,7 +12,8 @@ class ClientMessagesHandler {
   handleMessage(args, callback) {
     const port = args.port;
     if (this._messageComesFromServer(port)) {
-      this._parseServerMessage(args, 'server', (error, response) => {
+      console.log('SaaServer', port);
+      this._parseClientMessage(args, 'server', (error, response) => {
         return callback(error, response);
       });
     } else {
@@ -20,6 +21,10 @@ class ClientMessagesHandler {
         return callback(error, response);
       });
     }
+  }
+
+  _messageComesFromServer(port) {
+    return port === 9930;
   }
 
   _parseClientMessage(args, client, callback) {
@@ -45,7 +50,7 @@ class ClientMessagesHandler {
   _handleMessage(parsedXML, client, callback) {
     const type = 'message';
     const receiver = this._getReceiver(parsedXML, type);
-    const builtMessage = this._buildMessage(parsedXML, type);
+    const builtMessage = this._buildMessage(parsedXML, client, type);
     const transactionId = this._getTransactionId(parsedXML, type);
     if (receiver === 'all') return this._broadcastMessage(builtMessage, callback);
 
@@ -76,7 +81,7 @@ class ClientMessagesHandler {
     return parsedXML[type].file[0];
   }
 
-  _buildMessage(parsedXML) {
+  _buildMessage(parsedXML, client) {
     const type = 'message';
     const buildMessage = responseFactory(type, client);
 
@@ -115,6 +120,8 @@ class ClientMessagesHandler {
       port: receiverAddress.port,
       acknowledge: acknowledge
     };
+
+    console.log('jaja saludos', response);
 
     return callback(null, response);
   }

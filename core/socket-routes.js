@@ -35,6 +35,7 @@ const sendMessage = function(response, address, port) {
 };
 
 const sendAcknowledge = function(acknowledge, ip, port) {
+  console.log('sendAcknowledge', acknowledge);
   sendMessage(acknowledge, ip, port);
 };
 
@@ -101,6 +102,6 @@ socket.on('listening', () => {
   console.log(`server listening ${address.address}:${address.port}`);
 });
 
-socket.bind(9930);
+socket.bind(9940);
 
 module.exports = socket;

@@ -9,9 +9,9 @@ const serverMessageBuilder = function(args) {
   const response = `<message>` +
                       `<id>${transactionId}</id>` +
                       `<client>${sender}</client>` +
-                      `<message>${message}</message>` +
                       `<receiver>${receiver}</receiver>` +
-                   `</message>
+                      `<message>${message}</message>` +
+                   `</message>`;
 
   return response;
 };

@@ -8,7 +8,6 @@ const fileBuilder = require('./file-builder.js');
 const serverMessageBuilder = require('./server-message-builder.js');
 const serverAcknowledgeBuilder = require('./server-acknowledge-builder.js');
 const serverUsersListBuilder = require('./server-users-list-builder.js');
-const serverFileBuilder = require('./server-file-builder.js');
 
 const responseBuilderFactory = function(type, client) {
   if (type === 'message') {

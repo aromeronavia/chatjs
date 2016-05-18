@@ -23,6 +23,8 @@ describe('#ClientMessagesHandler', () => {
 
   it('should give a valid response for a get users request', (done) => {
     const clientMessage = '<users id="1" hola="mundo">holi</users>';
+    const SERVER_EXPECTED_USERS_LIST = '<clientList><id>1</id><clientList>alberto-roberto</clientList></clientList>';
+
     state.addUser({
       user: 'alberto',
       ip: '123.123.123.123',
@@ -35,7 +37,7 @@ describe('#ClientMessagesHandler', () => {
       port: 456
     });
 
-    const args = {
+    let args = {
       message: clientMessage,
       ip: '123.123.123.123',
       port: 455
@@ -45,7 +47,19 @@ describe('#ClientMessagesHandler', () => {
       if (error) return done(error);
       expect(response.message).to.be.equal(EXPECTED_USERS_LIST_RESPONSE);
       expect(response.intent).to.be.equal('reply');
-      done();
+
+      args = {
+        message: clientMessage,
+        ip: '123.123.123.123',
+        port: 9930
+      };
+
+      controller.handleMessage(args, (error, response) => {
+        if (error) return done(error);
+        expect(response.message).to.be.equal(SERVER_EXPECTED_USERS_LIST);
+        expect(response.intent).to.be.equal('reply');
+        done();
+      });
     });
   });
 
@@ -85,10 +99,11 @@ describe('#ClientMessagesHandler', () => {
   });
 
   it('should add a user and return the user list', (done) => {
-    const clientMessage = '<adduser id="1">alberto</adduser>';
+    let clientMessage = '<adduser id="1">alberto</adduser>';
     const EXPECTED_USERS_LIST = '<users id="1"><user>alberto</user></users>';
+    const SERVER_EXPECTED_USERS_LIST = '<clientList><id>1</id><clientList>alberto-roberto</clientList></clientList>';
 
-    const args = {
+    let args = {
       message: clientMessage,
       ip: '123.123.123.123',
       port: 455
@@ -99,7 +114,22 @@ describe('#ClientMessagesHandler', () => {
 
       expect(response.message === EXPECTED_USERS_LIST).to.be.equal(true);
       expect(response.intent).to.be.equal('reply');
-      done();
+
+      clientMessage = '<adduser id="1">roberto</adduser>';
+      args = {
+        message: clientMessage,
+        ip: '123.123.123.123',
+        port: 9930
+      };
+
+      controller.handleMessage(args, (error, response) => {
+        if (error) return done(error);
+        console.log(response.message);
+        console.log(SERVER_EXPECTED_USERS_LIST);
+        expect(response.message === SERVER_EXPECTED_USERS_LIST).to.be.equal(true);
+        expect(response.intent).to.be.equal('reply');
+        done();
+      });
     });
   });
 
@@ -109,13 +139,16 @@ describe('#ClientMessagesHandler', () => {
                             '<receiver>roberto</receiver>' +
                             '<message>quepedo</message>' +
                           '</message>';
+
+    const EXPECTED_SERVER_MESSAGE = '<message><id>1</id><client>alberto</client><receiver>roberto</receiver><message>quepedo</message></message>';
+
     state.addUser({
       user: 'roberto',
       ip: '123.123.123.123',
       port: 456
     });
 
-    const args = {
+    let args = {
       message: clientMessage,
       ip: '127.0.0.1',
       port: 4000
@@ -126,7 +159,20 @@ describe('#ClientMessagesHandler', () => {
       expect(response.intent).to.be.equal('send');
       expect(response.ip).to.be.equal('123.123.123.123');
       expect(response.port).to.be.equal(456);
-      done();
+
+      args = {
+        message: clientMessage,
+        ip: '127.0.0.1',
+        port: 9930
+      }
+
+      controller.handleMessage(args, (error, response) => {
+        expect(response.message).to.be.equal(EXPECTED_SERVER_MESSAGE);
+        expect(response.intent).to.be.equal('send');
+        expect(response.ip).to.be.equal('123.123.123.123');
+        expect(response.port).to.be.equal(456);
+        done();
+      });
     });
   });
 
@@ -143,7 +189,7 @@ describe('#ClientMessagesHandler', () => {
       port: 456
     });
 
-    const args = {
+    let args = {
       message: clientMessage,
       ip: '127.0.0.1',
       port: 4000
