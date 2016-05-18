@@ -19,8 +19,8 @@ class ClientMessagesHandler {
     const message = args.message;
     parseString(message, (error, response) => {
       const type = this._getType(response);
-      if (type === 'heartbeat') return this._assertUser(args);
-      if (type === 'file') return this._sendFile(args);
+      if (type === 'heartbeat') return this._assertUser(args, callback);
+      if (type === 'file') return this._sendFile(response, callback);
       if (type === 'adduser') {
         const addUserArgs = {
           parsedXML: response,
@@ -36,24 +36,47 @@ class ClientMessagesHandler {
   }
 
   _handleMessage(parsedXML, callback) {
-    const receiver = this._getReceiver(parsedXML);
-    const builtMessage = this._buildMessage(parsedXML);
+    const type = 'message';
+    const receiver = this._getReceiver(parsedXML, type);
+    const builtMessage = this._buildMessage(parsedXML, type);
+    const transactionId = this._getTransactionId(parsedXML, type);
     if (receiver === 'all') return this._broadcastMessage(builtMessage, callback);
 
-    return this._sendMessage(builtMessage, receiver, callback);
+    return this._sendMessage(builtMessage, receiver, callback, transactionId);
   }
 
-  _sendFile(args) {
+  _sendFile(parsedXML, callback) {
+    const type = 'file';
+    const buildFileMessage = responseFactory(type);
 
+    const file = this._getFile(parsedXML, type);
+    const sender = this._getSender(parsedXML, type);
+    const receiver = this._getReceiver(parsedXML, type);
+    const transactionId = this._getTransactionId(parsedXML, type);
+
+    const messageArgs = {
+      file: file,
+      sender: sender,
+      receiver: receiver,
+      transactionId: transactionId
+    };
+
+    const builtMessage = buildFileMessage(messageArgs);
+    return this._sendMessage(builtMessage, receiver, callback, transactionId);
+  }
+
+  _getFile(parsedXML, type) {
+    return parsedXML[type].file[0];
   }
 
   _buildMessage(parsedXML) {
-    const buildMessage = responseFactory('message');
+    const type = 'message';
+    const buildMessage = responseFactory(type);
 
-    const message = this._getMessage(parsedXML);
-    const sender = this._getSender(parsedXML);
-    const receiver = this._getReceiver(parsedXML);
-    const transactionId = this._getTransactionIdFromMessage(parsedXML);
+    const message = this._getMessage(parsedXML, type);
+    const sender = this._getSender(parsedXML, type);
+    const receiver = this._getReceiver(parsedXML, type);
+    const transactionId = this._getTransactionId(parsedXML, type);
     const hour = moment().format('hh:mm:ss');
 
     const messageArgs = {
@@ -68,7 +91,8 @@ class ClientMessagesHandler {
     return builtMessage;
   }
 
-  _sendMessage(builtMessage, receiver, callback) {
+  _sendMessage(builtMessage, receiver, callback, transactionId) {
+    const buildAcknowledge = responseFactory('acknowledge');
     let receiverAddress;
     try {
       receiverAddress = this.state.getAddressFromUser(receiver);
@@ -76,11 +100,13 @@ class ClientMessagesHandler {
       return callback(error);
     }
 
+    const acknowledge = buildAcknowledge({transactionId: transactionId});
     const response = {
       intent: 'send',
       message: builtMessage,
       ip: receiverAddress.ip,
-      port: receiverAddress.port
+      port: receiverAddress.port,
+      acknowledge: acknowledge
     };
 
     return callback(null, response);
@@ -105,8 +131,10 @@ class ClientMessagesHandler {
   }
 
   _getUsers(xmlObject, callback) {
-    const buildUsersList = responseFactory('users');
-    const transactionId = this._getTransactionId(xmlObject);
+    const type = 'users';
+
+    const buildUsersList = responseFactory(type);
+    const transactionId = this._getTransactionId(xmlObject, type);
     const users = this.state.requestUsers();
     const args = {
       transactionId: transactionId,
@@ -114,14 +142,15 @@ class ClientMessagesHandler {
     };
 
     const response = {
-      intent: 'send',
+      intent: 'reply',
       message: buildUsersList(args)
     };
     return callback(null, response);
   }
 
   _addUser(args, callback) {
-    const buildUsersList = responseFactory('users');
+    const type = 'users';
+    const buildUsersList = responseFactory(type);
     const parsedXML = args.parsedXML;
     const user = this._getUser(parsedXML);
     const addUserArgs = {
@@ -130,7 +159,7 @@ class ClientMessagesHandler {
       port: args.port
     };
 
-    const transactionId = this._getTransactionIdFromAddUser(parsedXML);
+    const transactionId = this._getTransactionId(parsedXML, 'adduser');
     const userList = this.state.addUser(addUserArgs);
     const buildListArgs = {
       transactionId: transactionId,
@@ -138,7 +167,7 @@ class ClientMessagesHandler {
     };
 
     const response = {
-      intent: 'send',
+      intent: 'reply',
       message: buildUsersList(buildListArgs)
     };
     return callback(null, response);
@@ -148,32 +177,24 @@ class ClientMessagesHandler {
     return xmlObject.adduser._;
   }
 
-  _getTransactionIdFromAddUser(xmlObject) {
-    return xmlObject.adduser.$.id;
-  }
-
   getAllUsersAdresses() {
     return this.state.getAllAddresses();
   }
 
-  _getMessage(parsedXML) {
-    return parsedXML.message.message[0];
+  _getMessage(parsedXML, type) {
+    return parsedXML[type].message[0];
   }
 
-  _getSender(parsedXML) {
-    return parsedXML.message.sender[0];
+  _getSender(parsedXML, type) {
+    return parsedXML[type].sender[0];
   }
 
-  _getReceiver(parsedXML) {
-    return parsedXML.message.receiver[0];
+  _getReceiver(parsedXML, type) {
+    return parsedXML[type].receiver[0];
   }
 
-  _getTransactionId(xmlObject) {
-    return xmlObject.users.$.id;
-  }
-
-  _getTransactionIdFromMessage(parsedXML) {
-    return parsedXML.message.$.id;
+  _getTransactionId(xmlObject, type) {
+    return xmlObject[type].$.id;
   }
 
   _getType(parsedXML) {

@@ -44,6 +44,7 @@ describe('#ClientMessagesHandler', () => {
     controller.handleMessage(args, (error, response) => {
       if (error) return done(error);
       expect(response.message).to.be.equal(EXPECTED_USERS_LIST_RESPONSE);
+      expect(response.intent).to.be.equal('reply');
       done();
     });
   });
@@ -97,6 +98,7 @@ describe('#ClientMessagesHandler', () => {
       if (error) return done(error);
 
       expect(response.message === EXPECTED_USERS_LIST).to.be.equal(true);
+      expect(response.intent).to.be.equal('reply');
       done();
     });
   });
@@ -121,6 +123,37 @@ describe('#ClientMessagesHandler', () => {
 
     controller.handleMessage(args, (error, response) => {
       expect(MESSAGE_REGEX.test(response.message)).to.be.equal(true);
+      expect(response.intent).to.be.equal('send');
+      expect(response.ip).to.be.equal('123.123.123.123');
+      expect(response.port).to.be.equal(456);
+      done();
+    });
+  });
+
+  it('should receive a message to send a file', (done) => {
+    const clientMessage = '<file id="1">' +
+                            '<sender>alberto</sender>' +
+                            '<receiver>roberto</receiver>' +
+                            '<file>quepedo</file>' +
+                          '</file>';
+
+    state.addUser({
+      user: 'roberto',
+      ip: '123.123.123.123',
+      port: 456
+    });
+
+    const args = {
+      message: clientMessage,
+      ip: '127.0.0.1',
+      port: 4000
+    }
+
+    controller.handleMessage(args, (error, response) => {
+      expect(response.message).to.be.equal(clientMessage);
+      expect(response.ip).to.be.equal('123.123.123.123');
+      expect(response.port).to.be.equal(456);
+      expect(response.intent).to.be.equal('send');
       done();
     });
   });

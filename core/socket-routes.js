@@ -9,15 +9,6 @@ let state = new State();
 
 let messagesHandler = new ClientMessagesHandler(state);
 
-const heartBeat = function () {
-  setInterval(() => {
-    console.log('each second');
-    const message = '<heartbeat />';
-    const args = prepareMessageForBroadcast(message);
-    broadcastMessage(args);
-  }, 1000);
-};
-
 const prepareMessageForBroadcast = function (message) {
   const addresses = state.getAllAddresses();
   const args = {
@@ -37,10 +28,14 @@ const sendMessage = function(response, address, port) {
   const portToReply = response.port || port;
   const addressToReply = response.ip || address;
   const reply = new Buffer('' + response.message);
-  console.log('sending reply', reply);
+  console.log('sending reply', '' + reply);
   socket.send(reply, 0, reply.length, portToReply, addressToReply, (err) => {
     console.log('error', err);
   });
+};
+
+const sendAcknowledge = function(acknowledge, ip, port) {
+  sendMessage(acknowledge, ip, port);
 };
 
 const broadcastMessage = function(args, address, port) {
@@ -64,9 +59,12 @@ const deliverResponse = function(error, response, address, port) {
 
   console.log('response to deliver', response);
   const intent = response.intent;
-  if (intent === 'send') sendMessage(response, address, port);
+  if (intent === 'reply') sendMessage(response, address, port);
   else if (intent === 'broadcast') broadcastMessage(response, address, port);
-  else if (intent === 'sendAndAcknowledge') sendAndAcknowledgeMessage(response, address, port);
+  else if (intent === 'send') {
+    sendMessage(response, address, port);
+    sendAcknowledge(response.acknowledge, address, port);
+  }
   else {
     console.error('intent', intent, 'is not allowed');
   }
@@ -101,7 +99,6 @@ socket.on('message', (message, rinfo) => {
 socket.on('listening', () => {
   var address = socket.address();
   console.log(`server listening ${address.address}:${address.port}`);
-  heartBeat();
 });
 
 socket.bind(9930);
