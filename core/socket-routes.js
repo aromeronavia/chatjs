@@ -9,6 +9,12 @@ let state = new State();
 
 let messagesHandler = new ClientMessagesHandler(state);
 
+const sendHourPeriodically = function () {
+  const hour = moment().format('hh:mm:ss');
+  const message = prepareMessageForBroadcast(hour);
+  broadcastMessage(message);
+};
+
 const prepareMessageForBroadcast = function (message) {
   const addresses = state.getAllAddresses();
   const args = {

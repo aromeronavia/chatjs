@@ -187,6 +187,13 @@ class ClientMessagesHandler {
     return callback(null, response);
   }
 
+  _assertUser(args, client, callback) {
+    const ip = args.ip;
+    const port = args.port;
+    this.state.assertUser(ip, port);
+    return callback(null, { intent: 'none' });
+  }
+
   _getUser(xmlObject) {
     return xmlObject.adduser._;
   }

@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const moment = require('moment');
 
 const USER_EXISTS = {
   code: 500,
@@ -15,6 +16,7 @@ class State {
   addUser(user) {
     const username = user.user;
     if (this._userExists(username)) return USER_EXISTS;
+    user.hour = moment('hh:mm:ss');
     this.connectedUsers.push(user);
     const response = this.requestUsers();
     return response;
@@ -45,6 +47,22 @@ class State {
     });
 
     return addresses;
+  }
+
+  _findUserByIpAndPort(ip, port) {
+    const user =_.find(this.connectedUsers, (user) => {
+      return user.ip === ip && user.port === port;
+    });
+
+    return user;
+  }
+
+  assertUser(ip, port) {
+    const user = this._findUserByIdAndPort(ip, port);
+    const hour = moment(user.hour);
+    if (hour.diff(moment('hh:mm:ss', 'seconds', true)) > 10) {
+      this.removeUser(user.user);
+    }
   }
 
   getAddressFromUser(user) {
