@@ -28,7 +28,7 @@ const sendMessage = function(response, address, port) {
   const portToReply = response.port || port;
   const addressToReply = response.ip || address;
   const reply = new Buffer('' + response.message);
-  console.log('sending reply', '' + reply);
+  console.log('sending reply', '' + reply + ' to ' + address + ':' + port);
   socket.send(reply, 0, reply.length, portToReply, addressToReply, (err) => {
     console.log('error', err);
   });
