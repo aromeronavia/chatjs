@@ -12,7 +12,6 @@ class ClientMessagesHandler {
   handleMessage(args, callback) {
     const port = args.port;
     if (this._messageComesFromServer(port)) {
-      console.log('SaaServer', port);
       this._parseClientMessage(args, 'server', (error, response) => {
         return callback(error, response);
       });
@@ -120,8 +119,6 @@ class ClientMessagesHandler {
       port: receiverAddress.port,
       acknowledge: acknowledge
     };
-
-    console.log('jaja saludos', response);
 
     return callback(null, response);
   }

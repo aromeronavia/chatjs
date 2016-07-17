@@ -21,7 +21,6 @@ describe('#State', () => {
     };
 
     const listUsers = state.addUser(user);
-    console.log(listUsers);
     expect(listUsers[0]).to.be.equal(user.user);
   });
 

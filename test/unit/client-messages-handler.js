@@ -124,8 +124,6 @@ describe('#ClientMessagesHandler', () => {
 
       controller.handleMessage(args, (error, response) => {
         if (error) return done(error);
-        console.log(response.message);
-        console.log(SERVER_EXPECTED_USERS_LIST);
         expect(response.message === SERVER_EXPECTED_USERS_LIST).to.be.equal(true);
         expect(response.intent).to.be.equal('reply');
         done();
@@ -152,9 +150,10 @@ describe('#ClientMessagesHandler', () => {
       message: clientMessage,
       ip: '127.0.0.1',
       port: 4000
-    }
+    };
 
     controller.handleMessage(args, (error, response) => {
+      if (error) return done(error);
       expect(MESSAGE_REGEX.test(response.message)).to.be.equal(true);
       expect(response.intent).to.be.equal('send');
       expect(response.ip).to.be.equal('123.123.123.123');
@@ -164,9 +163,10 @@ describe('#ClientMessagesHandler', () => {
         message: clientMessage,
         ip: '127.0.0.1',
         port: 9930
-      }
+      };
 
       controller.handleMessage(args, (error, response) => {
+        if (error) return done(error);
         expect(response.message).to.be.equal(EXPECTED_SERVER_MESSAGE);
         expect(response.intent).to.be.equal('send');
         expect(response.ip).to.be.equal('123.123.123.123');
@@ -189,13 +189,14 @@ describe('#ClientMessagesHandler', () => {
       port: 456
     });
 
-    let args = {
+    const args = {
       message: clientMessage,
       ip: '127.0.0.1',
       port: 4000
-    }
+    };
 
     controller.handleMessage(args, (error, response) => {
+      if (error) return done(error);
       expect(response.message).to.be.equal(clientMessage);
       expect(response.ip).to.be.equal('123.123.123.123');
       expect(response.port).to.be.equal(456);
@@ -217,9 +218,10 @@ describe('#ClientMessagesHandler', () => {
       message: clientMessage,
       ip: '123.123.123.123',
       port: 1255
-    }
+    };
 
     controller.handleMessage(args, (error, response) => {
+      if (error) return done(error);
       expect(response.intent).to.be.equal('none');
       done();
     });

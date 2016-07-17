@@ -49,8 +49,8 @@ class State {
   }
 
   _findUserByIpAndPort(ip, port) {
-    const user =_.find(this.connectedUsers, (user) => {
-      return user.ip === ip && user.port === port;
+    const user = _.find(this.connectedUsers, (connectedUser) => {
+      return connectedUser.ip === ip && connectedUser.port === port;
     });
 
     return user;

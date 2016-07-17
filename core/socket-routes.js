@@ -9,39 +9,16 @@ let state = new State();
 
 let messagesHandler = new ClientMessagesHandler(state);
 
-const sendHourPeriodically = function () {
-  const hour = moment().format('hh:mm:ss');
-  const message = prepareMessageForBroadcast(hour);
-  broadcastMessage(message);
-};
-
-const prepareMessageForBroadcast = function (message) {
-  const addresses = state.getAllAddresses();
-  const args = {
-    message: addresses.map((address) => {
-      return {
-        message: message,
-        ip: address.ip,
-        port: address.port
-      };
-    })
-  };
-  console.log(args);
-  return args;
-};
-
 const sendMessage = function(response, address, port) {
   const portToReply = response.port || port;
   const addressToReply = response.ip || address;
   const reply = new Buffer('' + response.message);
-  console.log('sending reply', '' + reply + ' to ' + address + ':' + port);
-  socket.send(reply, 0, reply.length, portToReply, addressToReply, (err) => {
-    console.log('error', err);
+  socket.send(reply, 0, reply.length, portToReply, addressToReply, (error) => {
+    if (error) console.log('error', error);
   });
 };
 
 const sendAcknowledge = function(acknowledge, ip, port) {
-  console.log('sendAcknowledge', acknowledge);
   sendMessage(acknowledge, ip, port);
 };
 
@@ -51,18 +28,14 @@ const broadcastMessage = function(args, address, port) {
     const portToReply = message.port || port;
     const addressToReply = message.ip || address;
     const reply = new Buffer('' + message.message);
-    console.log('reply broadcast', reply + '');
-    socket.send(reply, 0, reply.length, portToReply, addressToReply, (err) => {
-      console.log('error', err);
+    socket.send(reply, 0, reply.length, portToReply, addressToReply, (error) => {
+      if (error) console.log('error', error);
     });
   });
 };
 
 const deliverResponse = function(error, response, address, port) {
-  if (error) {
-    console.error(error);
-    return;
-  }
+  if (error) return console.error(error);
 
   console.log('response to deliver', response);
   const intent = response.intent;
@@ -71,8 +44,7 @@ const deliverResponse = function(error, response, address, port) {
   else if (intent === 'send') {
     sendMessage(response, address, port);
     sendAcknowledge(response.acknowledge, address, port);
-  }
-  else {
+  } else {
     console.error('intent', intent, 'is not allowed');
   }
 };

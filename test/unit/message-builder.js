@@ -35,13 +35,14 @@ describe('#MessageBuilder', () => {
       sender: 'Alberto'
     };
 
-    let message;
     try {
-      message = buildMessage(args);
-    } catch(error) {
+      /*eslint-disable*/
+      const message = buildMessage(args);
+      /*eslint-enable*/
+    } catch (error) {
       expect(error).to.exist;
       expect(error.message).to.be.equal(ERROR_MESSAGE);
       done();
     }
-  })
+  });
 });

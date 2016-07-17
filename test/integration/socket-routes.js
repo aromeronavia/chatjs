@@ -72,7 +72,6 @@ describe('#Application routes', () => {
     const socketClient = dgram.createSocket('udp4');
     socketClient.on('message', (response) => {
       const message = response + '';
-      console.log('arrived message socket 1', message);
       if (MESSAGE_REGEX.test(message)) {
         numberOfMessagesReceived += 1;
         if (numberOfMessagesReceived === 2) done();
@@ -84,7 +83,6 @@ describe('#Application routes', () => {
     const socketClient2 = dgram.createSocket('udp4');
     socketClient2.on('message', (response) => {
       const message = response + '';
-      console.log('arrived message socket 2', message);
       if (MESSAGE_REGEX.test(message)) {
         numberOfMessagesReceived += 1;
         if (numberOfMessagesReceived === 2) done();
@@ -106,7 +104,6 @@ describe('#Application routes', () => {
     const EXPECTED_SERVER_MESSAGE = '<message><id>1</id><client>alberto</client><receiver>roberto</receiver><message>quepedo</message></message>';
     socketClient.on('message', (response) => {
       const message = response + '';
-      console.log('arrived message socket 1', message);
       if (message === EXPECTED_SERVER_MESSAGE) {
         socketClient.close();
         done();
@@ -126,7 +123,6 @@ describe('#Application routes', () => {
     const EXPECTED_SERVER_MESSAGE = '<clientList><id>1</id><clientList>roberto</clientList></clientList>';
     socketClient.on('message', (response) => {
       const message = response + '';
-      console.log('arrived message socket 1', message);
       if (message === EXPECTED_SERVER_MESSAGE) done();
     });
 
